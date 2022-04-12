@@ -4,7 +4,7 @@
   created  23 Feb 2022
   modified 11 Apr 2022
   by Euan Mutch (TechAUmNu)
-  
+
 */
 
 #include <SPI.h>
@@ -20,18 +20,20 @@ void setup() {
   pinMode(LED, OUTPUT);
   // see if the card is present and can be initialized:
 
-  while (!SD.begin(chipSelect));  
+  while (!SD.begin(chipSelect));
 
   logFile = SD.open("log.csv", FILE_WRITE);
   infoFile = SD.open("fw.txt", FILE_WRITE);
 
-  // Once SDCard is ok, connect to VESC  
+  // Once SDCard is ok, connect to VESC
   Serial.begin(115200);
-  while (!Serial) {;}
+  while (!Serial) {
+    ;
+  }
   UART.setSerialPort(&Serial);
-  
-// Read firmware info and log
-if ( UART.getVescFirmwareInfo() ) {
+
+  // Read firmware info and log
+  if ( UART.getVescFirmwareInfo() ) {
     if (infoFile) {
       infoFile.print("FW:");
       infoFile.print(UART.firmware.firmwareVersionMajor);
@@ -42,12 +44,12 @@ if ( UART.getVescFirmwareInfo() ) {
       infoFile.print("HW:");
       infoFile.println(UART.firmware.hardwareName);
       infoFile.close();
-      }  
+    }
   }
-  logFile.println("ms_today,input_voltage,temp_mos_max,temp_mos_1,temp_mos_2,temp_mos_3,temp_motor,current_motor,current_in,d_axis_current,q_axis_current,erpm,duty_cycle,amp_hours_used,amp_hours_charged,watt_hours_used,watt_hours_charged,tachometer,tachometer_abs,encoder_position,fault_code,vesc_id,d_axis_voltage,q_axis_voltage");   
+  logFile.println("ms_today,input_voltage,temp_mos_max,temp_mos_1,temp_mos_2,temp_mos_3,temp_motor,current_motor,current_in,d_axis_current,q_axis_current,erpm,duty_cycle,amp_hours_used,amp_hours_charged,watt_hours_used,watt_hours_charged,tachometer,tachometer_abs,encoder_position,fault_code,vesc_id,d_axis_voltage,q_axis_voltage");
 }
 
-void loop() { 
+void loop() {
   if (logFile) {
     if ( UART.getVescValues() ) {
       digitalWrite(LED, HIGH);
@@ -95,13 +97,13 @@ void loop() {
       logFile.print(",");
       logFile.print(UART.data.d_axis_voltage);
       logFile.print(",");
-      logFile.println(UART.data.q_axis_voltage); 
-      logFile.close();     
-      } 
-    } else {    
-      while (!SD.begin(chipSelect)) {
-        digitalWrite(LED, LOW); 
-      }
-    logFile = SD.open("log.csv", FILE_WRITE);    
+      logFile.println(UART.data.q_axis_voltage);
+      logFile.close();
+    }
+  } else {
+    while (!SD.begin(chipSelect)) {
+      digitalWrite(LED, LOW);
+    }
+    logFile = SD.open("log.csv", FILE_WRITE);
   }
 }

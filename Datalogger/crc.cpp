@@ -13,14 +13,14 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    */
+*/
 
 /*
- * crc.c
- *
- *  Created on: 26 feb 2012
- *      Author: benjamin
- */
+   crc.c
+
+    Created on: 26 feb 2012
+        Author: benjamin
+*/
 #include "crc.h"
 
 // CRC Table
@@ -64,14 +64,14 @@
 //}
 
 
-unsigned short crc16(const unsigned char* data_p, unsigned int length){
-    unsigned char x;
-    unsigned short crc = 0x0000;
+unsigned short crc16(const unsigned char* data_p, unsigned int length) {
+  unsigned char x;
+  unsigned short crc = 0x0000;
 
-    while (length--){
-        x = crc >> 8 ^ *data_p++;
-        x ^= x>>4;
-        crc = (crc << 8) ^ ((unsigned short)(x << 12)) ^ ((unsigned short)(x <<5)) ^ ((unsigned short)x);
-    }
-    return crc;
+  while (length--) {
+    x = crc >> 8 ^ *data_p++;
+    x ^= x >> 4;
+    crc = (crc << 8) ^ ((unsigned short)(x << 12)) ^ ((unsigned short)(x << 5)) ^ ((unsigned short)x);
+  }
+  return crc;
 }

@@ -2,8 +2,8 @@
 #define CRC_H_
 
 /*
- * Functions
- */
+   Functions
+*/
 unsigned short crc16(const unsigned char *buf, unsigned int len);
 
 #endif /* CRC_H_ */

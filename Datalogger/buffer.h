@@ -13,14 +13,14 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    */
+*/
 
 /*
- * buffer.h
- *
- *  Created on: 13 maj 2013
- *      Author: benjamin
- */
+   buffer.h
+
+    Created on: 13 maj 2013
+        Author: benjamin
+*/
 
 #ifndef BUFFER_H_
 #define BUFFER_H_
