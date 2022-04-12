@@ -7,6 +7,13 @@
 
 */
 
+
+// TODO:
+// Handling for removed/reinserted sd cards
+// Only write header in file one time?
+// Create new file each time power up so the logs don't get muddled up
+// Reclaim some space!
+
 #include <SPI.h>
 #include <SD.h>
 #include "VescUart.h"
@@ -26,7 +33,7 @@ void setup() {
   infoFile = SD.open("fw.txt", FILE_WRITE);
 
   // Once SDCard is ok, connect to VESC
-  Serial.begin(115200);
+  Serial.begin(460800);
   while (!Serial) {
     ;
   }
@@ -98,9 +105,10 @@ void loop() {
       logFile.print(UART.data.d_axis_voltage);
       logFile.print(",");
       logFile.println(UART.data.q_axis_voltage);
-      logFile.close();
+      logFile.availableForWrite();
     }
   } else {
+    digitalWrite(LED, LOW);
     while (!SD.begin(chipSelect)) {
       digitalWrite(LED, LOW);
     }
