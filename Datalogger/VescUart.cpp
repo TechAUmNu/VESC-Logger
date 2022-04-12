@@ -146,34 +146,33 @@ bool VescUart::processReadPacket(uint8_t * message) {
 
     case COMM_GET_VALUES: // Structure defined here: https://github.com/vedderb/bldc/blob/master/commands.c#L362
 
-      data.temp_mos_max 		    = buffer_get_float16(message, 10.0f, &ind); 	    // 2 bytes - mc_interface_temp_fet_filtered()
-      data.temp_motor 			    = buffer_get_float16(message, 10.0f, &ind); 	    // 2 bytes - mc_interface_temp_motor_filtered()
-      data.current_motor 	      = buffer_get_float32(message, 100.0f, &ind);      // 4 bytes - mc_interface_read_reset_avg_motor_current()
-      data.current_in 	        = buffer_get_float32(message, 100.0f, &ind);      // 4 bytes - mc_interface_read_reset_avg_input_current()
-      data.d_axis_current       = buffer_get_float32(message, 100.0f, &ind);;     // 4 bytes - mc_interface_read_reset_avg_id()
-      data.q_axis_current       = buffer_get_float32(message, 100.0f, &ind);;     // 4 bytes - mc_interface_read_reset_avg_iq()
-      data.duty_cycle 		      = buffer_get_float16(message, 1000.0f, &ind); 	  // 2 bytes - mc_interface_get_duty_cycle_now()
-      data.erpm 				        = buffer_get_float32(message, 1.0f, &ind);		    // 4 bytes - mc_interface_get_rpm()
-      data.input_voltage 		    = buffer_get_float16(message, 10.0f, &ind);		    // 2 bytes - GET_INPUT_VOLTAGE()
-      data.amp_hours_used 			= buffer_get_float32(message, 10000.0f, &ind);	  // 4 bytes - mc_interface_get_amp_hours(false)
-      data.amp_hours_charged 	  = buffer_get_float32(message, 10000.0f, &ind);	  // 4 bytes - mc_interface_get_amp_hours_charged(false)
-      data.watt_hours_used			= buffer_get_float32(message, 10000.0f, &ind);	  // 4 bytes - mc_interface_get_watt_hours(false)
-      data.watt_hours_charged 	= buffer_get_float32(message, 10000.0f, &ind);	  // 4 bytes - mc_interface_get_watt_hours_charged(false)
-      data.tachometer 		      = buffer_get_int32(message, &ind);				        // 4 bytes - mc_interface_get_tachometer_value(false)
-      data.tachometer_abs 		  = buffer_get_int32(message, &ind);				        // 4 bytes - mc_interface_get_tachometer_abs_value(false)
-      data.fault_code 				  = message[ind++];								                  // 1 byte  - mc_interface_get_fault()
-      data.encoder_position			= buffer_get_float32(message, 1000000.0f, &ind);	// 4 bytes - mc_interface_get_pid_pos_now()
-      data.vesc_id					    = message[ind++];								                  // 1 byte  - app_get_configuration()->controller_id
-      data.temp_mos_1           = buffer_get_float16(message, 10.0f, &ind);       // 2 bytes - NTC_TEMP_MOS1()
-      data.temp_mos_2           = buffer_get_float16(message, 10.0f, &ind);       // 2 bytes - NTC_TEMP_MOS2()
-      data.temp_mos_3           = buffer_get_float16(message, 10.0f, &ind);       // 2 bytes - NTC_TEMP_MOS3()
-      data.d_axis_voltage       = buffer_get_float32(message, 1000.0f, &ind);;    // 4 bytes - mc_interface_read_reset_avg_vd()
-      data.q_axis_voltage       = buffer_get_float32(message, 1000.0f, &ind);;    // 4 bytes - mc_interface_read_reset_avg_vq()
+      data.temp_mos_max         = buffer_get_float16(message, 10.0f, &ind);         // 2 bytes - mc_interface_temp_fet_filtered()
+      data.temp_motor           = buffer_get_float16(message, 10.0f, &ind);         // 2 bytes - mc_interface_temp_motor_filtered()
+      data.current_motor        = buffer_get_float32(message, 100.0f, &ind);        // 4 bytes - mc_interface_read_reset_avg_motor_current()
+      data.current_in           = buffer_get_float32(message, 100.0f, &ind);        // 4 bytes - mc_interface_read_reset_avg_input_current()
+      data.d_axis_current       = buffer_get_float32(message, 100.0f, &ind);;       // 4 bytes - mc_interface_read_reset_avg_id()
+      data.q_axis_current       = buffer_get_float32(message, 100.0f, &ind);;       // 4 bytes - mc_interface_read_reset_avg_iq()
+      data.duty_cycle           = buffer_get_float16(message, 1000.0f, &ind);       // 2 bytes - mc_interface_get_duty_cycle_now()
+      data.erpm                 = buffer_get_float32(message, 1.0f, &ind);          // 4 bytes - mc_interface_get_rpm()
+      data.input_voltage        = buffer_get_float16(message, 10.0f, &ind);         // 2 bytes - GET_INPUT_VOLTAGE()
+      data.amp_hours_used       = buffer_get_float32(message, 10000.0f, &ind);      // 4 bytes - mc_interface_get_amp_hours(false)
+      data.amp_hours_charged    = buffer_get_float32(message, 10000.0f, &ind);      // 4 bytes - mc_interface_get_amp_hours_charged(false)
+      data.watt_hours_used      = buffer_get_float32(message, 10000.0f, &ind);      // 4 bytes - mc_interface_get_watt_hours(false)
+      data.watt_hours_charged   = buffer_get_float32(message, 10000.0f, &ind);      // 4 bytes - mc_interface_get_watt_hours_charged(false)
+      data.tachometer           = buffer_get_int32(message, &ind);                  // 4 bytes - mc_interface_get_tachometer_value(false)
+      data.tachometer_abs       = buffer_get_int32(message, &ind);                  // 4 bytes - mc_interface_get_tachometer_abs_value(false)
+      data.fault_code           = message[ind++];                                   // 1 byte  - mc_interface_get_fault()
+      data.encoder_position     = buffer_get_float32(message, 1000000.0f, &ind);    // 4 bytes - mc_interface_get_pid_pos_now()
+      data.vesc_id              = message[ind++];                                   // 1 byte  - app_get_configuration()->controller_id
+      data.temp_mos_1           = buffer_get_float16(message, 10.0f, &ind);         // 2 bytes - NTC_TEMP_MOS1()
+      data.temp_mos_2           = buffer_get_float16(message, 10.0f, &ind);         // 2 bytes - NTC_TEMP_MOS2()
+      data.temp_mos_3           = buffer_get_float16(message, 10.0f, &ind);         // 2 bytes - NTC_TEMP_MOS3()
+      data.d_axis_voltage       = buffer_get_float32(message, 1000.0f, &ind);       // 4 bytes - mc_interface_read_reset_avg_vd()
+      data.q_axis_voltage       = buffer_get_float32(message, 1000.0f, &ind);       // 4 bytes - mc_interface_read_reset_avg_vq()
       return true;
 
     default:
-      return false;
-      break;
+      return false;      
   }
 }
 
@@ -182,8 +181,7 @@ bool VescUart::getVescFirmwareInfo(void) {
   uint8_t command[1] = { COMM_FW_VERSION };
   uint8_t payload[256];
 
-  packSendPayload(command, 1);
-  // delay(1); //needed, otherwise data is not read
+  packSendPayload(command, 1);  
 
   int lenPayload = receiveUartMessage(payload);
 
@@ -202,8 +200,7 @@ bool VescUart::getVescValues(void) {
   uint8_t command[1] = { COMM_GET_VALUES };
   uint8_t payload[256];
 
-  packSendPayload(command, 1);
-  // delay(1); //needed, otherwise data is not read
+  packSendPayload(command, 1);  
 
   int lenPayload = receiveUartMessage(payload);
 
