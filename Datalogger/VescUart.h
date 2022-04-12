@@ -8,31 +8,39 @@
 
 class VescUart
 {
+
+  
 	/** Struct to store the telemetry data returned by the VESC */
 	struct dataPackage {
-		float avgMotorCurrent;
-		float avgInputCurrent;
-		float dutyCycleNow;
-		float rpm;
-		float inpVoltage;
-		float ampHours;
-		float ampHoursCharged;
-		float wattHours;
-		float wattHoursCharged;
+    float input_voltage;
+    float temp_mos_max;
+    float temp_mos_1;
+    float temp_mos_2;
+    float temp_mos_3;
+    float temp_motor;    
+		float current_motor;
+		float current_in;
+		float d_axis_current;
+    float q_axis_current;
+		float erpm;		
+		float duty_cycle;
+		float amp_hours_used;
+		float amp_hours_charged;
+		float watt_hours_used;
+		float watt_hours_charged;
 		long tachometer;
-		long tachometerAbs;
-		float tempMosfet;
-		float tempMotor;
-		uint8_t error; 
-		float pidPos;
-		uint8_t id; 
+		long tachometer_abs;
+		float encoder_position;		
+		uint8_t fault_code; 		
+		uint8_t vesc_id; 
+    float d_axis_voltage;
+    float q_axis_voltage;
 	};
-
-	/** Struct to hold the nunchuck values to send over UART */
+  
 	struct firmwarePackage {
 		uint8_t	firmwareVersionMajor;
 		uint8_t	firmwareVersionMinor;
-		char hardwareName[40]; // valUpperButton
+		char hardwareName[40];
 		uint8_t firmwareVersionBeta;
 	};
 
@@ -54,8 +62,7 @@ class VescUart
 		 * @param      port  - Reference to Serial port (pointer) 
 		 */
 		void setSerialPort(UartClass* port);
-	
-
+			
 		/**
 		 * @brief      Sends a command to VESC and stores the returned data
 		 *
@@ -74,10 +81,7 @@ class VescUart
 
 		/** Variabel to hold the reference to the Serial object to use for UART */
 		HardwareSerial* serialPort = NULL;
-
-		/** Variabel to hold the reference to the Serial object to use for debugging. 
-		  * Uses the class Stream instead of HarwareSerial */
-		Stream* debugPort = NULL;
+		
 
 		/**
 		 * @brief      Packs the payload and sends it over Serial
@@ -113,6 +117,7 @@ class VescUart
 		 * @return     True if the process was a success
 		 */
 		bool processReadPacket(uint8_t * message);
+		
 
 };
 

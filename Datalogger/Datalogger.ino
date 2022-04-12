@@ -7,7 +7,6 @@
   
 */
 
-
 #include <SPI.h>
 #include <SD.h>
 #include "VescUart.h"
@@ -15,124 +14,94 @@ const int LED = 4;
 const int chipSelect = 0;
 
 VescUart UART;
-File dataFile;
+File logFile, infoFile;
 
 void setup() {
   pinMode(LED, OUTPUT);
-
-  digitalWrite(LED, HIGH);  
-  delay(2000);                       
-  digitalWrite(LED, LOW); 
-   
   // see if the card is present and can be initialized:
 
-   while (!SD.begin(chipSelect))
-   {      
-      digitalWrite(LED, HIGH);  
-      delay(100);                       
-      digitalWrite(LED, LOW);    
-      delay(100);
-      digitalWrite(LED, HIGH);  
-      delay(100);                       
-      digitalWrite(LED, LOW);    
-      delay(100);   
-      digitalWrite(LED, HIGH);  
-      delay(100);                       
-      digitalWrite(LED, LOW);    
-      delay(100);
-  } 
+  while (!SD.begin(chipSelect));  
 
- dataFile = SD.open("datalog.txt", FILE_WRITE);
+  logFile = SD.open("log.csv", FILE_WRITE);
+  infoFile = SD.open("fw.txt", FILE_WRITE);
 
-  // Once SDCard is ok, connect to VESC
-   Serial.begin(115200);
-   while (!Serial) {;}
-   UART.setSerialPort(&Serial);  
-
+  // Once SDCard is ok, connect to VESC  
+  Serial.begin(115200);
+  while (!Serial) {;}
+  UART.setSerialPort(&Serial);
+  
 // Read firmware info and log
 if ( UART.getVescFirmwareInfo() ) {
-    if (dataFile) {
-      dataFile.println("VESC LOGGER by TechAUmNu on the VESC Discord, support here https://discord.com/channels/904830990319485030/937343467984662559");
-      dataFile.print("FW: ");
-      dataFile.print(UART.firmware.firmwareVersionMajor);
-      dataFile.print(".");
-      dataFile.print(UART.firmware.firmwareVersionMinor);
-      dataFile.print("\tBeta: ");
-      dataFile.println(UART.firmware.firmwareVersionBeta);
-      dataFile.print("Hardware: ");
-      dataFile.println(UART.firmware.hardwareName);
-      dataFile.println("tempmos, tempmot, avgMotorCurrent, avgInputCurrent, dutyCycle, RPM, inputVoltage, ampHours, ampHoursCharged, wattHours, wattHoursCharged, tachometer, tachometerAbs, error, pidPos, id");    
-    }  
+    if (infoFile) {
+      infoFile.print("FW:");
+      infoFile.print(UART.firmware.firmwareVersionMajor);
+      infoFile.print(".");
+      infoFile.print(UART.firmware.firmwareVersionMinor);
+      infoFile.print(" B:");
+      infoFile.println(UART.firmware.firmwareVersionBeta);
+      infoFile.print("HW:");
+      infoFile.println(UART.firmware.hardwareName);
+      infoFile.close();
+      }  
   }
-  else
-  {
-
-    dataFile.println("Failed to read firmware data");
-  }
-  
+  logFile.println("ms_today,input_voltage,temp_mos_max,temp_mos_1,temp_mos_2,temp_mos_3,temp_motor,current_motor,current_in,d_axis_current,q_axis_current,erpm,duty_cycle,amp_hours_used,amp_hours_charged,watt_hours_used,watt_hours_charged,tachometer,tachometer_abs,encoder_position,fault_code,vesc_id,d_axis_voltage,q_axis_voltage");   
 }
 
-void loop() {
-  // if the file is available, write to it:
-  if (dataFile) {
-      if ( UART.getVescValues() ) {
-        digitalWrite(LED, HIGH);
-        dataFile.print(UART.data.tempMosfet);
-        dataFile.print(",\t");
-        dataFile.print(UART.data.tempMotor);
-        dataFile.print(",\t");
-        dataFile.print(UART.data.avgMotorCurrent);
-        dataFile.print(",\t");
-        dataFile.print(UART.data.avgInputCurrent);
-        dataFile.print(",\t");
-        dataFile.print(UART.data.dutyCycleNow);
-        dataFile.print(",\t");
-        dataFile.print(UART.data.rpm);
-        dataFile.print(",\t");
-        dataFile.print(UART.data.inpVoltage);
-        dataFile.print(",\t");
-        dataFile.print(UART.data.ampHours);
-        dataFile.print(",\t");
-        dataFile.print(UART.data.ampHoursCharged);
-        dataFile.print(",\t");
-        dataFile.print(UART.data.wattHours);
-        dataFile.print(",\t");
-        dataFile.print(UART.data.wattHoursCharged);
-        dataFile.print(",\t");
-        dataFile.print(UART.data.tachometer);
-        dataFile.print(",\t");
-        dataFile.print(UART.data.tachometerAbs);
-        dataFile.print(",\t");
-        dataFile.print(UART.data.error);
-        dataFile.print(",\t");
-        dataFile.println(UART.data.pidPos);             
-        dataFile.close();        
-      }
-      else
-      {
+void loop() { 
+  if (logFile) {
+    if ( UART.getVescValues() ) {
+      digitalWrite(LED, HIGH);
+      logFile.print(millis()); // Timestamp
+      logFile.print(",");
+      logFile.print(UART.data.input_voltage);
+      logFile.print(",");
+      logFile.print(UART.data.temp_mos_max);
+      logFile.print(",");
+      logFile.print(UART.data.temp_mos_1);
+      logFile.print(",");
+      logFile.print(UART.data.temp_mos_2);
+      logFile.print(",");
+      logFile.print(UART.data.temp_mos_3);
+      logFile.print(",");
+      logFile.print(UART.data.temp_motor);
+      logFile.print(",");
+      logFile.print(UART.data.current_motor);
+      logFile.print(",");
+      logFile.print(UART.data.current_in);
+      logFile.print(",");
+      logFile.print(UART.data.d_axis_current);
+      logFile.print(",");
+      logFile.print(UART.data.q_axis_current);
+      logFile.print(",");
+      logFile.print(UART.data.erpm);
+      logFile.print(",");
+      logFile.print(UART.data.duty_cycle);
+      logFile.print(",");
+      logFile.print(UART.data.amp_hours_used);
+      logFile.print(",");
+      logFile.print(UART.data.amp_hours_charged);
+      logFile.print(",");
+      logFile.print(UART.data.watt_hours_charged);
+      logFile.print(",");
+      logFile.print(UART.data.tachometer);
+      logFile.print(",");
+      logFile.print(UART.data.tachometer_abs);
+      logFile.print(",");
+      logFile.print(UART.data.encoder_position);
+      logFile.print(",");
+      logFile.print(UART.data.fault_code);
+      logFile.print(",");
+      logFile.print(UART.data.vesc_id);
+      logFile.print(",");
+      logFile.print(UART.data.d_axis_voltage);
+      logFile.print(",");
+      logFile.println(UART.data.q_axis_voltage); 
+      logFile.close();     
+      } 
+    } else {    
+      while (!SD.begin(chipSelect)) {
         digitalWrite(LED, LOW); 
-        dataFile.println("Failed to get data!");
       }
-        
-   
-  }
-  // if the file isn't open, probably means the card is not inserted
-  else {    
-     while (!SD.begin(chipSelect))
-     {      
-        digitalWrite(LED, HIGH);  
-        delay(100);                       
-        digitalWrite(LED, LOW);    
-        delay(100);
-        digitalWrite(LED, HIGH);  
-        delay(100);                       
-        digitalWrite(LED, LOW);    
-        delay(100);   
-        digitalWrite(LED, HIGH);  
-        delay(100);                       
-        digitalWrite(LED, LOW);    
-        delay(100);
-    }
-    dataFile = SD.open("datalog.txt", FILE_WRITE);    
+    logFile = SD.open("log.csv", FILE_WRITE);    
   }
 }
