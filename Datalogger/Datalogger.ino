@@ -58,8 +58,13 @@ void setup() {
   logFile.println("ms_today,input_voltage,temp_mos_max,temp_mos_1,temp_mos_2,temp_mos_3,temp_motor,current_motor,current_in,d_axis_current,q_axis_current,erpm,duty_cycle,encoder_position,fault_code,vesc_id,d_axis_voltage,q_axis_voltage");
   digitalWrite(LED, HIGH);
 }
-
+int i = 0;
+bool ledState = false;
 void loop() {  
+    if(i > 10) {
+      digitalWrite(LED, ledState=!ledState);
+      i = 0;
+    }
     if ( UART.getVescValues() ) {        
         logFile.print(millis()); // Timestamp
         logFile.print(",");
@@ -97,8 +102,8 @@ void loop() {
         logFile.print(",");
         logFile.println(UART.data.q_axis_voltage);
         logFile.availableForWrite();
-        digitalWrite(LED, HIGH);       
+        i++;       
     } else {
-      digitalWrite(LED, LOW);  
+        digitalWrite(LED, LOW);  
     }    
 }
