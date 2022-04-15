@@ -9,14 +9,14 @@
 
 
 // TODO:
-// Handling for removed/reinserted sd cards
-// Only write header in file one time?
-// Create new file each time power up so the logs don't get muddled up
+// Handling for removed/reinserted sd cards - requires switch on card socket to be wired up on pcb!
 // Reclaim some space!
 
+#include <EEPROM.h>
 #include <SPI.h>
 #include <SD.h>
 #include "VescUart.h"
+
 const int LED = 4;
 const int chipSelect = 0;
 
@@ -24,42 +24,46 @@ VescUart UART;
 File logFile, infoFile;
 
 void setup() {
-  pinMode(LED, OUTPUT);
+  //pinMode(LED, OUTPUT); // SUPER bright with this set.
   
-  // see if the card is present and can be initialized:
-
+  // wait for sd card
   while (!SD.begin(chipSelect)){}
-
-  logFile = SD.open("log.csv", FILE_WRITE);
-  infoFile = SD.open("fw.txt", FILE_WRITE);
-  
-  // Once SDCard is ok, connect to VESC
   Serial.begin(1000000);
   while (!Serial) {}
-  
-  UART.setSerialPort(&Serial);
+  UART.setSerialPort(&Serial); 
 
-  // Read firmware info and log
+  // create new file each boot
+  byte boots =  EEPROM.read(0);
+  EEPROM.update(0, ++boots);
+  // Filename must conform to short DOS 8.3
+  char fileName[12];
+  char temp[5];
+  strcpy(fileName, itoa(boots, temp, 10)); 
+  strcat(fileName, ".csv");
+  logFile = SD.open(fileName, FILE_WRITE);  
+
+  // Read firmware info and put at start of log file
   while(!UART.getVescFirmwareInfo()){}
   if ( UART.getVescFirmwareInfo() ) {
-    if (infoFile) {
-      infoFile.print("FW:");
-      infoFile.print(UART.firmware.firmwareVersionMajor);
-      infoFile.print(".");
-      infoFile.print(UART.firmware.firmwareVersionMinor);
-      infoFile.print(" B:");
-      infoFile.println(UART.firmware.firmwareVersionBeta);
-      infoFile.print("HW:");
-      infoFile.println(UART.firmware.hardwareName);
-      infoFile.close();
+    if (logFile) {
+      logFile.print("FW:");
+      logFile.print(UART.firmware.firmwareVersionMajor);
+      logFile.print(".");
+      logFile.print(UART.firmware.firmwareVersionMinor);
+      logFile.print(" B:");
+      logFile.println(UART.firmware.firmwareVersionBeta);
+      logFile.print("HW:");
+      logFile.println(UART.firmware.hardwareName);
     }
   }
- 
-  logFile.println("ms_today,input_voltage,temp_mos_max,temp_mos_1,temp_mos_2,temp_mos_3,temp_motor,current_motor,current_in,d_axis_current,q_axis_current,erpm,duty_cycle,encoder_position,fault_code,vesc_id,d_axis_voltage,q_axis_voltage");
-  digitalWrite(LED, HIGH);
+  
+ // Not required
+ // logFile.println("ms_today,input_voltage,temp_mos_max,temp_mos_1,temp_mos_2,temp_mos_3,temp_motor,current_motor,current_in,d_axis_current,q_axis_current,erpm,duty_cycle,amp_hours_used,amp_hours_charged,watt_hours_used,watt_hours_charged,tachometer,tachometer_abs,encoder_position,fault_code,vesc_id,d_axis_voltage,q_axis_voltage");
 }
+
 int i = 0;
 bool ledState = false;
+
 void loop() {  
     if(i > 10) {
       digitalWrite(LED, ledState=!ledState);
@@ -91,7 +95,11 @@ void loop() {
         logFile.print(UART.data.erpm);
         logFile.print(",");
         logFile.print(UART.data.duty_cycle);
-        logFile.print(",");      
+        logFile.print(",");
+        logFile.print(UART.data.amp_hours_used);
+        logFile.print(",");
+        logFile.print(UART.data.amp_hours_charged);
+        logFile.print(",,,,,");      
         logFile.print(UART.data.encoder_position);
         logFile.print(",");
         logFile.print(UART.data.fault_code);
