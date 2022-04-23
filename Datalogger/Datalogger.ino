@@ -24,7 +24,7 @@ VescUart UART;
 File logFile, infoFile;
 
 void setup() {
-  //pinMode(LED, OUTPUT); // SUPER bright with this set.
+  pinMode(LED, OUTPUT); // SUPER bright with this set.
   
   // wait for sd card
   while (!SD.begin(chipSelect)){}
