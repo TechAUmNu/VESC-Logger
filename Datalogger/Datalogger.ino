@@ -6,6 +6,7 @@
   by Euan Mutch (TechAUmNu)
 
 */
+#define MAX_LINES_PER_FILE 180000 // approx 30 min - Stops VESC Tool crashing when opening very long logs
 
 #include <EEPROM.h>
 #include <SPI.h>
@@ -122,9 +123,8 @@ void loop() {
  
   // Logging loop
   while(true) {   
-    if(lineCount > 10) { // Flash LED to slow logging
-      digitalWrite(LED, ledState=!ledState);      
-      lineCount = 0;
+    if(lineCount % 10 == 1) { // Flash LED to show logging
+      digitalWrite(LED, ledState=!ledState);
     }
     if ( UART.getVescValues() ) {        
         logFile.print(millis()); // Timestamp
@@ -170,6 +170,10 @@ void loop() {
         lineCount++;       
     } else {
         digitalWrite(LED, LOW);  
+    }
+    if(lineCount > MAX_LINES_PER_FILE){
+        logFile.close(); // Close the file in the file system
+        break;
     }   
     if (digitalRead(cardDetect)) {   
       logFile.close(); // Close the file in the file system
