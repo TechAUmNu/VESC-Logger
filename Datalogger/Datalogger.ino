@@ -1,4 +1,6 @@
 /*
+ * 
+ *  Run at 20MHz for max logging speed
   SD card datalogger
   SD Card must be formatted FAT32; exFAT will not work at the moment
   created  23 Feb 2022
@@ -57,8 +59,8 @@ void setup() {
 
   // Configure logic block
   Logic0.enable = true;
-  Logic0.input0 = logic_in::disable;
-  Logic0.input1 = logic_in::disable;
+  Logic0.input0 = logic_in::ac0;
+  Logic0.input1 = logic_in::ac1;
   Logic0.input2 = logic_in::ac2;
   Logic0.output = logic_out::enable;
   Logic0.filter = logic_filter::filter;

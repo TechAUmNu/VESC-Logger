@@ -1,4 +1,6 @@
 /*
+ * 
+ * Run at 8MHz to reduce chance of false trip on the OC
   created  23 Feb 2022
   modified 16 Apr 2023
   by Euan Mutch (TechAUmNu)
@@ -79,11 +81,6 @@ void setup() {
   Comparator1.input_p = comparator_in_p::in3;      // Use positive input 3 (PB4)
   Comparator2.input_p = comparator_in_p::in1;      // Use positive input 1 (PB0)
 
-  // Large hysteresis to try and stop false tripping
-  Comparator0.hysteresis = comparator_hyst::large;
-  Comparator1.hysteresis = comparator_hyst::large;
-  Comparator2.hysteresis = comparator_hyst::large;
-
   // Initialize comparators
   Comparator0.init();
   Comparator1.init();
@@ -106,7 +103,7 @@ void setup() {
   Comparator2.start();
 
   // Start the AVR logic hardware
-  //Logic::start();
+  Logic::start();
 
   // I2C for resetting overcurrent protection
   Wire.swap(1);
@@ -116,9 +113,9 @@ void setup() {
   digitalWrite(PIN_LED, 0);
 
   // Turn on outputs that should be on all the time
-  //digitalWrite(PIN_3V3_EN, 1);
-  //digitalWrite(PIN_5V_EN, 1);
-  //digitalWrite(PIN_12V_AUX_EN, 0);
+  digitalWrite(PIN_3V3_EN, 1);
+  digitalWrite(PIN_5V_EN, 1);
+  digitalWrite(PIN_12V_AUX_EN, 0);
   V_12V_AUX_MON.begin();
 }
 
@@ -139,7 +136,7 @@ void processCommand(int16_t numBytes) {
 
 // Instantly trip outputs, retry after 1s.
 void loop() {
-  /*delay(1);
+  delay(1);
   digitalWrite(PIN_LED, 0);
   if (!digitalRead(PIN_3V3_FAULT))
   {
@@ -244,5 +241,5 @@ void loop() {
     
   } else {
     digitalWrite(PIN_12V_AUX_EN, 0);
-  }*/
+  }
 }
