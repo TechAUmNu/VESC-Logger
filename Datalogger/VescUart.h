@@ -11,7 +11,7 @@ class VescUart
 
 
     /** Struct to store the telemetry data returned by the VESC */
-    struct dataPackage {
+    struct commValues {
       float input_voltage;
       float temp_mos_max;
       float temp_mos_1;
@@ -28,13 +28,58 @@ class VescUart
       float amp_hours_charged;
       float watt_hours_used;
       float watt_hours_charged;
-      long tachometer;
-      long tachometer_abs;
+      int32_t tachometer;
+      int32_t tachometer_abs;
       float encoder_position;
       uint8_t fault_code;
       uint8_t vesc_id;
       float d_axis_voltage;
       float q_axis_voltage;
+    };
+	
+	struct commSetupValues {
+      float temp_mos_max;
+      float temp_motor;
+      float current_motor;
+      float current_in;
+      float duty_cycle;
+      float erpm;
+      float speed;
+      float input_voltage;
+      float battery_level;
+      float ah_total;
+      float ah_charge_total;
+      float wh_total;
+      float wh_charge_total;
+      float distance;
+      float distance_abs;
+      float pid_position;
+      uint8_t fault_code;
+      uint8_t vesc_id;
+      uint8_t num_vescs;
+      float wh_battery_left;
+      uint32_t odometer;
+      uint32_t setupValTime;      
+    };
+	
+	struct commIMUValues {
+      float rpy0;
+      float rpy1;
+      float rpy2;
+      float acc0;
+      float acc1;
+      float acc2;
+      float gyro0;
+      float gyro1;
+      float gyro2;
+      float mag0;
+      float mag1;
+      float mag2;
+      float q0;
+      float q1;
+      float q2;
+      float q3;
+      uint8_t vesc_id;      
     };
 
     struct firmwarePackage {
@@ -52,7 +97,9 @@ class VescUart
     VescUart(void);
 
     /** Variabel to hold measurements returned from VESC */
-    dataPackage data;
+    commValues dataValues;
+	commSetupValues dataSetupValues;
+	commIMUValues dataIMU;
 
     /** Variabel to hold firmware version values */
     firmwarePackage firmware;
@@ -69,7 +116,8 @@ class VescUart
        @return     True if successfull otherwise false
     */
     bool getVescValues(void);
-
+    bool getVescSetupValues(void);
+    bool getIMUValues(void);
     /**
        @brief      Sends a command to VESC and stores the returned data
 

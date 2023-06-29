@@ -61,7 +61,7 @@ void setup() {
   digitalWrite(PIN_LED, 1);
 
   // Configure event channel for reset  
-  Event1.set_generator(gens::disable);
+  Event1.set_generator(0xFF);
   Event1.set_user(user::ccl1_event_a);
   Event1.start();
   
@@ -79,6 +79,11 @@ void setup() {
   Comparator1.input_p = comparator_in_p::in3;      // Use positive input 3 (PB4)
   Comparator2.input_p = comparator_in_p::in1;      // Use positive input 1 (PB0)
 
+  // Large hysteresis to try and stop false tripping
+  Comparator0.hysteresis = comparator_hyst::large;
+  Comparator1.hysteresis = comparator_hyst::large;
+  Comparator2.hysteresis = comparator_hyst::large;
+
   // Initialize comparators
   Comparator0.init();
   Comparator1.init();
@@ -90,6 +95,7 @@ void setup() {
   Logic0.input1 = logic_in::ac1;
   Logic0.input2 = logic_in::ac2;
   Logic0.output = logic_out::enable;
+  Logic0.filter = logic_filter::filter;
   Logic0.sequencer = logic_sequencer::rs_latch; // Latch output
   Logic0.truth = 0xFE;                    // Set truth table (3 input OR)
   Logic0.init();
@@ -100,44 +106,40 @@ void setup() {
   Comparator2.start();
 
   // Start the AVR logic hardware
-  Logic::start();
+  //Logic::start();
 
   // I2C for resetting overcurrent protection
   Wire.swap(1);
   Wire.begin(0x68);                 // join i2c bus with address 0x68
-  Wire.onReceive(resetOvercurrent);
+  Wire.onReceive(processCommand);
 
   digitalWrite(PIN_LED, 0);
 
   // Turn on outputs that should be on all the time
-  digitalWrite(PIN_3V3_EN, 1);
-  digitalWrite(PIN_5V_EN, 1);
-  digitalWrite(PIN_12V_AUX_EN, 0);
+  //digitalWrite(PIN_3V3_EN, 1);
+  //digitalWrite(PIN_5V_EN, 1);
+  //digitalWrite(PIN_12V_AUX_EN, 0);
   V_12V_AUX_MON.begin();
 }
 
 static bool AUX_ENABLED = false;
 
-void resetOvercurrent(int16_t numBytes) {
-  switch (Wire.read()) {
-    case 0x54:
-      Event1.soft_event();
-      break;
-    case 0x21:
+void processCommand(int16_t numBytes) {
+  if (Wire.read() == 0x54) { // Check for correct reset code
+      Event1.soft_event();    
+  } else if (Wire.read() == 0x21) { 
       AUX_ENABLED = true;
-      Startup_12V_Count = STARTUP_12V_DELAY;
-      break;
-    case 0x20:
+      Startup_12V_Count = STARTUP_12V_DELAY; 
+  } else if (Wire.read() == 0x20) { 
       AUX_ENABLED = false;
-      break;
-  }
+  } 
 }
 
 
 
 // Instantly trip outputs, retry after 1s.
 void loop() {
-  delay(1);
+  /*delay(1);
   digitalWrite(PIN_LED, 0);
   if (!digitalRead(PIN_3V3_FAULT))
   {
@@ -242,5 +244,5 @@ void loop() {
     
   } else {
     digitalWrite(PIN_12V_AUX_EN, 0);
-  }
+  }*/
 }
