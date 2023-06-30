@@ -52,7 +52,7 @@ movingAvg V_12V_AUX_MON(10);
 
 void setup() {
 
-  _PROTECTED_WRITE(WDT.CTRLA, WDT_PERIOD_1KCLK_gc); //enable the WDT, 1s
+  _PROTECTED_WRITE(WDT.CTRLA, WDT_PERIOD_1KCLK_gc); //enable the WDT, 1s https://github.com/SpenceKonde/megaTinyCore/blob/master/megaavr/extras/Ref_Reset.md
   
   pinMode(PIN_LED, OUTPUT);
   pinMode(PIN_3V3_EN, OUTPUT);
@@ -64,6 +64,12 @@ void setup() {
   pinMode(PIN_12V_AUX_MON, INPUT);
 
   digitalWrite(PIN_LED, 1);
+
+  // Check the watchdog actually works
+  //uint8_t resetflags = GPIOR0;
+  //if (resetflags == RSTCTRL_WDRF_bm){
+  //  while(true);
+  //}
 
   // Configure event channel for reset  
   Event1.set_generator(0xFF);

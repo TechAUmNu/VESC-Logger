@@ -31,12 +31,19 @@ File logFile;
 
 
 void setup() {
-  _PROTECTED_WRITE(WDT.CTRLA, WDT_PERIOD_4KCLK_gc); //enable the WDT, 4s 
-   
+  _PROTECTED_WRITE(WDT.CTRLA, WDT_PERIOD_4KCLK_gc); //enable the WDT, 4s https://github.com/SpenceKonde/megaTinyCore/blob/master/megaavr/extras/Ref_Reset.md
+  wdt_reset(); 
+  
   pinMode(LED, OUTPUT);
   pinMode(cardDetect, INPUT);
-  digitalWrite(LED, 1);
+  digitalWrite(LED, 1);  
 
+  // Check the watchdog actually works
+  //uint8_t resetflags = GPIOR0;
+  //if (resetflags == RSTCTRL_WDRF_bm){
+  //  while(true);
+  //}
+  
   // Event channel for reseting faults
   Event1.set_generator(0xFF); // Dodgy but works; if set to disabled it constantly triggers
   Event1.set_user(user::ccl1_event_a);
