@@ -14,7 +14,7 @@
 #include <Wire.h>
 #include <movingAvg.h>
 
-
+#define wdt_reset() __asm__ __volatile__ ("wdr"::)
 
 #define RESTORE_3V3_DELAY 1000
 #define RESTORE_5V_DELAY 1000
@@ -51,6 +51,9 @@ movingAvg V_12V_AUX_MON(10);
 
 
 void setup() {
+
+  _PROTECTED_WRITE(WDT.CTRLA, WDT_PERIOD_1KCLK_gc); //enable the WDT, 1s
+  
   pinMode(PIN_LED, OUTPUT);
   pinMode(PIN_3V3_EN, OUTPUT);
   pinMode(PIN_5V_EN, OUTPUT);
@@ -136,6 +139,7 @@ void processCommand(int16_t numBytes) {
 
 // Instantly trip outputs, retry after 1s.
 void loop() {
+  wdt_reset();
   delay(1);
   digitalWrite(PIN_LED, 0);
   if (!digitalRead(PIN_3V3_FAULT))

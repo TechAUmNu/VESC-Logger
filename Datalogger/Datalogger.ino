@@ -19,6 +19,8 @@
 #include <Event.h>
 #include <Wire.h>
 
+#define wdt_reset() __asm__ __volatile__ ("wdr"::)
+
 const int LED = 4;
 const int chipSelect = 13;
 const int cardDetect = 16;
@@ -29,6 +31,8 @@ File logFile;
 
 
 void setup() {
+  _PROTECTED_WRITE(WDT.CTRLA, WDT_PERIOD_4KCLK_gc); //enable the WDT, 4s 
+   
   pinMode(LED, OUTPUT);
   pinMode(cardDetect, INPUT);
   digitalWrite(LED, 1);
@@ -84,7 +88,10 @@ void setup() {
 
   //Serial.swap(1); // Not required on V4.1 logic board
   Serial.begin(1000000);
-  while (!Serial) {}
+  while (!Serial) {
+    wdt_reset();
+    delay(1);      
+  }
   UART.setSerialPort(&Serial);
   SPI.swap(1);
 
@@ -103,13 +110,17 @@ void resetOvercurrent(int16_t numBytes) {
 byte subFile = 0; // creates a new file each time sd card is replugged while in the same boot
 
 void loop() {
-  while (digitalRead(cardDetect)) {
+  while (digitalRead(cardDetect)) {// Wait for card
+    wdt_reset();
     digitalWrite(LED, 1);
     delay(1000);
     digitalWrite(LED, 0);
     delay(1000);
-   }  // Wait for card
-  while (!SD.begin(chipSelect)) {}    // Wait for card to connect
+  }  
+  while (!SD.begin(chipSelect)) { // Wait for card to connect
+    wdt_reset();
+    delay(1); 
+  }    
   char temp[10];
   // Filename must conform to short DOS 8.3
   char fileName[20];
@@ -123,6 +134,7 @@ void loop() {
 
   // Read firmware info and put at start of log file
   while (!UART.getVescFirmwareInfo()) {
+    wdt_reset();
     digitalWrite(LED,  1);
     delay(500);
     digitalWrite(LED, 0);
@@ -144,6 +156,7 @@ void loop() {
 
   // Logging loop
   while (true) {
+    wdt_reset();
     if (lineCount % 10 == 1) { // Flash LED to show logging
       digitalWrite(LED, ledState = !ledState);
     }
