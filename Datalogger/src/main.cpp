@@ -10,6 +10,7 @@
 */
 #define MAX_LINES_PER_FILE 50000 // Stops VESC Tool crashing when opening very long logs
 
+#include "Arduino.h"
 #include <EEPROM.h>
 #include <SPI.h>
 #include <SD.h>
@@ -31,6 +32,8 @@ byte boots;
 VescUart UART;
 File logFile;
 
+void resetOvercurrent(int numBytes);
+void processHandshake();
 
 void setup() {
   _PROTECTED_WRITE(WDT.CTRLA, WDT_PERIOD_4KCLK_gc); //enable the WDT, 4s https://github.com/SpenceKonde/megaTinyCore/blob/master/megaavr/extras/Ref_Reset.md
@@ -53,17 +56,17 @@ void setup() {
 
   // Initialize logic block 1
   Logic1.enable = true;                // Enable logic block 1
-  Logic1.input0 = logic_in::event_a;         // Connect input 0 to ccl1_event_a (PB2 through Event1)
-  Logic1.input1 = logic_in::masked;
-  Logic1.input2 = logic_in::masked;
-  Logic1.output = logic_out::disable;
+  Logic1.input0 = logic::in::event_a;         // Connect input 0 to ccl1_event_a (PB2 through Event1)
+  Logic1.input1 = logic::in::masked;
+  Logic1.input2 = logic::in::masked;
+  Logic1.output = logic::out::disable;
   Logic1.truth = 0xFE;                  // Set truth table
   Logic1.init();
 
   // Configure relevant comparator parameters
-  Comparator0.input_p = comparator_in_p::in2;      // Use positive input 2 (PB1)
-  Comparator1.input_p = comparator_in_p::in3;      // Use positive input 3 (PB4)
-  Comparator2.input_p = comparator_in_p::in1;      // Use positive input 1 (PB0)
+  Comparator0.input_p = comparator::in_p::in2;      // Use positive input 2 (PB1)
+  Comparator1.input_p = comparator::in_p::in3;      // Use positive input 3 (PB4)
+  Comparator2.input_p = comparator::in_p::in1;      // Use positive input 1 (PB0)
   
   // Initialize comparators
   Comparator0.init();
@@ -72,12 +75,12 @@ void setup() {
 
   // Configure logic block
   Logic0.enable = true;
-  Logic0.input0 = logic_in::ac0;
-  Logic0.input1 = logic_in::ac1;
-  Logic0.input2 = logic_in::ac2;
-  Logic0.output = logic_out::enable;
-  Logic0.filter = logic_filter::filter;
-  Logic0.sequencer = logic_sequencer::rs_latch; // Latch output
+  Logic0.input0 = logic::in::ac0;
+  Logic0.input1 = logic::in::ac1;
+  Logic0.input2 = logic::in::ac2;
+  Logic0.output = logic::out::enable;
+  Logic0.filter = logic::filter::filter;
+  Logic0.sequencer = logic::sequencer::rs_latch; // Latch output
   Logic0.truth = 0xFE;                    // Set truth table (3 input OR)
   Logic0.init();
 
@@ -110,7 +113,7 @@ void setup() {
   EEPROM.update(0, ++boots);
 }
 
-void resetOvercurrent(int16_t numBytes) {
+void resetOvercurrent(int numBytes) {
   switch (Wire.read()) { // Check for correct reset code
     case 0x53:
       Event1.soft_event();  
