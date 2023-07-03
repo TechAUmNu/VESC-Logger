@@ -20,6 +20,8 @@
 #include <Wire.h>
 
 #define wdt_reset() __asm__ __volatile__ ("wdr"::)
+#define ATTINY3216_HANDSHAKE_REPLY 0x71
+
 
 const int LED = 4;
 const int chipSelect = 13;
@@ -36,7 +38,7 @@ void setup() {
   
   pinMode(LED, OUTPUT);
   pinMode(cardDetect, INPUT);
-  digitalWrite(LED, 1);  
+  digitalWrite(LED, 0);  
 
   // Check the watchdog actually works
   //uint8_t resetflags = GPIOR0;
@@ -91,6 +93,7 @@ void setup() {
   Wire.swap(1);
   Wire.begin(0x69);                 // join i2c bus with address 0x69
   Wire.onReceive(resetOvercurrent);
+  Wire.onRequest(processHandshake);
 
 
   //Serial.swap(1); // Not required on V4.1 logic board
@@ -108,9 +111,15 @@ void setup() {
 }
 
 void resetOvercurrent(int16_t numBytes) {
-  if (Wire.read() == 0x53) { // Check for correct reset code
-    Event1.soft_event();    
-  }
+  switch (Wire.read()) { // Check for correct reset code
+    case 0x53:
+      Event1.soft_event();  
+      break;  
+  } 
+}
+
+void processHandshake() {   
+ Wire.write(ATTINY3216_HANDSHAKE_REPLY);  // Handshake to enable gate driver
 }
 
 

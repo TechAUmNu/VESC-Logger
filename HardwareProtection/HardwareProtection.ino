@@ -15,6 +15,7 @@
 #include <movingAvg.h>
 
 #define wdt_reset() __asm__ __volatile__ ("wdr"::)
+#define ATTINY1616_HANDSHAKE_REPLY 0x73
 
 #define RESTORE_3V3_DELAY 1000
 #define RESTORE_5V_DELAY 1000
@@ -118,6 +119,7 @@ void setup() {
   Wire.swap(1);
   Wire.begin(0x68);                 // join i2c bus with address 0x68
   Wire.onReceive(processCommand);
+  Wire.onRequest(processHandshake);
 
   digitalWrite(PIN_LED, 0);
 
@@ -131,17 +133,25 @@ void setup() {
 static bool AUX_ENABLED = false;
 
 void processCommand(int16_t numBytes) {
-  if (Wire.read() == 0x54) { // Check for correct reset code
-      Event1.soft_event();    
-  } else if (Wire.read() == 0x21) { 
+  switch(Wire.read()){
+    case 0x54:
+      Event1.soft_event(); 
+      break;
+
+    case 0x21:
       AUX_ENABLED = true;
       Startup_12V_Count = STARTUP_12V_DELAY; 
-  } else if (Wire.read() == 0x20) { 
+      break;
+
+    case 0x20:
       AUX_ENABLED = false;
+      break;
   } 
 }
 
-
+void processHandshake() { 
+ Wire.write(ATTINY1616_HANDSHAKE_REPLY);  // Handshake to enable gate driver 
+}
 
 // Instantly trip outputs, retry after 1s.
 void loop() {
@@ -190,7 +200,7 @@ void loop() {
   }
 
   if (AUX_ENABLED)
-  {
+  {    
     // Only enable 12v aux if the output is enabled and 12V rail is OK.
     if (!digitalRead(PIN_P_GOOD))
     {
@@ -208,7 +218,7 @@ void loop() {
           {
             if(Startup_12V_Count <= 0)
               digitalWrite(PIN_12V_AUX_EN, 0);
-            digitalWrite(PIN_LED, 1);
+              digitalWrite(PIN_LED, 1);
             if (F_12V_count > 0)
             {
               F_12V_count--;
@@ -226,7 +236,7 @@ void loop() {
               AUX_FAULTED = true;
               if(Startup_12V_Count <= 0)
                 digitalWrite(PIN_12V_AUX_EN, 0);
-              digitalWrite(PIN_LED, 1);
+                digitalWrite(PIN_LED, 1);
             }
           }
         } else {
@@ -250,6 +260,6 @@ void loop() {
 
     
   } else {
-    digitalWrite(PIN_12V_AUX_EN, 0);
+    digitalWrite(PIN_12V_AUX_EN, 0);    
   }
 }
