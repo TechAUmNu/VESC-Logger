@@ -23,11 +23,11 @@
 
 #define TRIP_3V3_DELAY 100
 #define TRIP_5V_DELAY 100
-#define TRIP_12V_DELAY 2000
+#define TRIP_12V_DELAY 5000 // Only trip for sustained overcurrent
 
-#define STARTUP_12V_DELAY 5000
+#define STARTUP_12V_DELAY 10000 // Time for a fan to spinup, or prime a small pump
 
-#define TRIP_12V_THRES 800 //11.3V
+#define TRIP_12V_THRES 820 //11V
 
 const int PIN_LED = 10;
 const int PIN_3V3_EN = 7;
@@ -47,7 +47,7 @@ static int Startup_12V_Count = 0;
 static bool AUX_FAULTED = false;
 
 byte boots;
-MovingAverage <uint8_t, 10> V_12V_AUX_MON;
+//MovingAverage <int, 10> V_12V_AUX_MON; For some reason this is just completely wrong
 
 void processCommand(int numBytes);
 void processHandshake();
@@ -64,6 +64,8 @@ void setup() {
   pinMode(PIN_5V_FAULT, INPUT_PULLUP);
   pinMode(PIN_P_GOOD, INPUT_PULLUP);
   pinMode(PIN_12V_AUX_MON, INPUT);
+  analogReadResolution(10);
+  analogReference(VDD);
 
   digitalWrite(PIN_LED, 1);
 
@@ -200,7 +202,7 @@ void loop() {
   }
 
   if (AUX_ENABLED)
-  {    
+  {        
     // Only enable 12v aux if the output is enabled and 12V rail is OK.
     if (!digitalRead(PIN_P_GOOD))
     {
@@ -212,7 +214,7 @@ void loop() {
       {
         F_PGOOD_count--;
       } else {
-        if (V_12V_AUX_MON.add(analogRead(PIN_12V_AUX_MON)) < 850)
+        if (analogRead(PIN_12V_AUX_MON) < TRIP_12V_THRES)
         {
           if (AUX_FAULTED)
           {
