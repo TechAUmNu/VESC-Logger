@@ -1,6 +1,6 @@
 /*
  * 
- *  Run at 20MHz for max logging speed
+ *  Run at 10MHz for max logging speed, 20MHz / 16MHz is unstable on some chips
   SD card datalogger
   SD Card must be formatted FAT32; exFAT will not work at the moment
   created  23 Feb 2022
@@ -155,7 +155,7 @@ void loop() {
   while (!UART.getVescFirmwareInfo()) {
     wdt_reset();
     digitalWrite(LED,  1);
-    delay(500);
+    delay(100);
     digitalWrite(LED, 0);
     delay(500);
   }
