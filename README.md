@@ -19,3 +19,14 @@ Now that the digipot has the correct voltage the comparators are not triggered a
 
 
 Communication based on https://github.com/SolidGeek/VescUart
+ATTiny support https://github.com/SpenceKonde/megaTinyCore/
+
+Compiling:
+The two firmwares are setup for use in VSCode (https://code.visualstudio.com/) using the PlatformIO  extension to build and upload.
+![image](https://github.com/TechAUmNu/VESC-Logger/assets/6648855/1c679b36-3132-4798-9eab-e99403d83f1a)
+
+Flashing:
+To flash the ATTiny chips you will need an Arduino Nano programmed with jtag2updi https://github.com/ElTangas/jtag2updi
+Connect ground and the appropriate UPDI line. I used two connectors to allow easily switching between chips when developing the firmware.
+![image](https://github.com/TechAUmNu/VESC-Logger/assets/6648855/e8f362c9-8274-4340-a18f-171bb1c0de4a)
+
