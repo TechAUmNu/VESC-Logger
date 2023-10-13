@@ -100,7 +100,7 @@ void setup() {
 
 
   //Serial.swap(1); // Not required on V4.1 logic board
-  Serial.begin(1000000);
+  Serial.begin(100000);
   while (!Serial) {
     wdt_reset();
     delay(1);      
@@ -137,8 +137,23 @@ void loop() {
     delay(1000);
   }  
   while (!SD.begin(chipSelect)) { // Wait for card to connect
+    while (digitalRead(cardDetect)) {// Wait for card
+      wdt_reset();
+      digitalWrite(LED, 1);
+      delay(1000);
+      digitalWrite(LED, 0);
+      delay(1000);
+    } 
     wdt_reset();
     delay(1); 
+    digitalWrite(LED, 1);
+    delay(10);
+    digitalWrite(LED, 0);
+    delay(100);
+    digitalWrite(LED, 1);
+    delay(10);
+    digitalWrite(LED, 0);
+    delay(100);
   }    
   char temp[10];
   // Filename must conform to short DOS 8.3
